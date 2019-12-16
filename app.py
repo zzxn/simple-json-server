@@ -181,10 +181,12 @@ def get_all_articles():
     size = int(request.args.get('size', len(article_data)))
     classname = request.args.get('classname', None)
 
-    page = article_data[index:index + size]
+    page = article_data
     if classname not in (None, ''):
         page = [article for article in page if article['classname'] == classname]
+    page = page[index:index + size]
     page.reverse()
+    print(page.__len__())
     return response(page)
 
 
