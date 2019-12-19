@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from functools import reduce
 
 from flask import Flask, request
 from util import log
@@ -297,6 +298,24 @@ def delete_classname(classname):
             article['classname'] = None
     classname_list.remove(classname)
     return response()
+
+
+# ********************** management related **********************
+
+
+def add(a, b):
+    return a + b
+
+
+@app.route('/api/statistics', methods=['GET'])
+def get_statistics():
+    return response({
+        'article_number': len(article_data),
+        'view_number': reduce(add, map(lambda a: a['view_number'], article_data)),
+        'like_number': reduce(add, map(lambda a: a['like_number'], article_data)),
+        'comment_number': reduce(add, map(lambda a: len(a['comments']), article_data)),
+        'user_number': len(user_data)
+    })
 
 
 if __name__ == '__main__':
