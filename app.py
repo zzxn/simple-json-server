@@ -24,7 +24,7 @@ with open('data/classname.json', encoding='utf-8') as f:
     classname_list: list = json.load(f)
 
 
-def response(data=None, code: str = 'ok', error_type: str = None, error_message: str = None):
+def response(data=None, code: str = '200', error_type: str = None, error_message: str = None):
     res = {'code': code}
     if error_type is not None or error_message is not None:
         res['error'] = {
@@ -36,7 +36,7 @@ def response(data=None, code: str = 'ok', error_type: str = None, error_message:
     return res
 
 
-NOT_FOUND_ERROR_RESPONSE = response(code='error', error_type='not found', error_message='找不到资源')
+NOT_FOUND_ERROR_RESPONSE = response(code='404', error_type='not found', error_message='找不到资源')
 
 
 def get_user_by_id(user_id: str):
@@ -91,7 +91,7 @@ def register():
     data = json.loads(request.get_data(as_text=True))
     for user in user_data:
         if user['username'] == data['username']:
-            return response(code='error', error_type='duplicate')
+            return response(code='404', error_type='duplicate')
 
     new_user = {
         'id': str(uuid.uuid4()).replace('-', ''),
@@ -110,12 +110,15 @@ def register():
 @app.route('/api/user/modify', methods=['POST'])
 def modify_user_info():
     data = json.loads(request.get_data(as_text=True))
+    print(data)
     for user in user_data:
         if user['id'] == data['id']:
             if 'username' in data.keys() and data['username'].strip() != '':
                 user['username'] = data['username']
+                print('change username!')
             if 'password' in data.keys() and data['password'].strip() != '':
                 user['password'] = data['password']
+                print('change password!')
             return response()
 
     return NOT_FOUND_ERROR_RESPONSE
@@ -225,7 +228,7 @@ def increment_like(article_id):
 def comment(article_id):
     data: dict = json.loads(request.get_data(as_text=True))
     if 'text' not in data.keys():
-        return response(code='error', error_type='bad request', error_message='评论不能为空')
+        return response(code='404', error_type='bad request', error_message='评论不能为空')
     data.setdefault('user_id', '084f47b675824bc38d0c5043ffba7a30')
     for article in article_data:
         if article_id == article['id']:
@@ -269,7 +272,7 @@ def search_article():
     keyword = request.args.get('keyword', '').strip()
 
     if keyword == '':
-        return response(code='error', error_type='bad request', error_message='关键词不能为空')
+        return response(code='404', error_type='bad request', error_message='关键词不能为空')
 
     kw_list = list(jieba.cut_for_search(keyword))
     if classname is not None:
